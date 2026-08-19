@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国内期货手续费与保证金实时计算 - 期货手续费一览表</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <h1>国内期货手续费 · 保证金一览表 <span class="sub">交易所标准 · 实时行情 · 自动计算</span></h1>
+    <div class="meta">
+      <span><span class="dot" id="quoteDot"></span><span id="quoteStatus">正在连接实时行情…</span></span>
+      <span>手续费数据同步：<b id="feeSyncTime"></b></span>
+      <span>行情更新时间：<b id="quoteSyncTime"></b></span>
+      <span>共 <b id="totalCount"></b> 个合约</span>
+    </div>
+  </div>
+</header>
+
+<div class="promo">
+  <div class="wrap">
+    <span>🔥 <b>期货开户优惠</b>：手续费可申请降至交易所标准</span>
+    <button class="wechat" data-copy-wechat="qhcg66" id="btnCopyWechat">复制微信</button>
+    <span class="btn-more" id="btnOpenAd">查看开户详情 →</span>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="wrap">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="搜索合约名称 / 代码，如 螺纹钢 或 rb">
+      <span class="icon">🔍</span>
+    </div>
+    <div class="tabs" id="exchTabs">
+      <div class="tab active" data-exch="all">全部</div>
+    </div>
+    <div class="right">
+      <button class="btn" id="btnCalcMethod" title="手续费收取方式说明">📖 手续费说明</button>
+      <a class="btn" href="options.html">🎫 期权手续费</a>
+      <button class="btn" id="btnRefresh" title="立即刷新行情">🔄 刷新行情</button>
+      <div class="dropdown-wrap">
+        <button class="btn primary" id="btnExcel">⬇ 下载 Excel ▾</button>
+        <div class="dropdown" id="excelMenu">
+          <div class="drop-item" data-mode="main">仅主力合约 <small>（85 个）</small></div>
+          <div class="drop-item" data-mode="all">全部合约 <small>（约 800+ 个）</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="statusbar">
+  <div class="notice" id="notice">
+    说明：下表为<b>交易所标准</b>手续费与保证金，期货公司会加收一定比例；行情来自东方财富公开接口，价格/成交量自动刷新。
+    点击每行行首的 <b>▸</b> 可展开/收起该品种的<b>全部合约月份</b>（同一品种各月份费率/乘数相同，保证金临近交割月可能上调，以交易所为准）。点击任意行可带入下方计算器。
+  </div>
+</div>
+
+<section class="calc" id="calcSection">
+  <div class="panel">
+    <div class="panel-head">
+      <span class="title">🧮 保证金 + 手续费计算器</span>
+      <span class="desc">交易所保证金+%、手续费+% 可调，价格随行情自动更新，可手动修改</span>
+    </div>
+    <div class="panel-body">
+      <div class="calc-grid">
+        <div class="field combo-wrap">
+          <label>合约（可输入代码/名称检索）</label>
+          <input type="text" id="calcContractInput" placeholder="如：rb / 螺纹钢 / eb2611" autocomplete="off">
+          <div class="combo-list" id="calcComboList"></div>
+        </div>
+        <div class="field">
+          <label>价格（元）</label>
+          <input type="number" id="calcPrice" step="any" placeholder="自动获取行情">
+        </div>
+        <div class="field">
+          <label>手数</label>
+          <input type="number" id="calcLots" value="1" min="1" step="1">
+        </div>
+        <div class="field">
+          <label>保证金加收（+%）</label>
+          <input type="number" id="calcMarginAdd" value="0" step="0.1">
+        </div>
+        <div class="field">
+          <label>手续费加收（+%）</label>
+          <input type="number" id="calcFeeAdd" value="0" step="0.1">
+        </div>
+      </div>
+      <div class="calc-results" id="calcResults"></div>
+      <div class="calc-info" id="calcInfo"></div>
+    </div>
+  </div>
+</section>
+
+<main id="main"></main>
+
+<button class="float-btn" id="btnFloatAd">📞 开户优惠</button>
+
+<div class="modal-mask" id="adModal">
+  <div class="modal">
+    <span class="close" data-close="adModal">×</span>
+    <h3>🔥 期货开户优惠</h3>
+    <p>添加微信备注「<b>开户</b>」，可申请：</p>
+    <ul style="margin:0 0 12px 18px; line-height:1.9;">
+      <li>手续费降至<b>交易所标准</b>附近</li>
+      <li>VIP 费率开户，一对一服务</li>
+      <li>办理速度快</li>
+    </ul>
+    <div class="wechat-row">
+      <span>微信号：</span><span class="wx" id="adWechat">qhcg66</span>
+      <button class="btn primary" data-copy-wechat="qhcg66">复制微信号</button>
+    </div>
+    <p>扫码加微信（备注“开户”）：</p>
+    <img class="qr-img" id="adQr" src="img/qrcode.png" alt="微信二维码">
+    <p style="color:#a33; font-size:12px;">※ 请把「qhcg66」和二维码图片替换成你的真实信息（在 index.html 中搜索“qhcg66”和“adQr”修改）。</p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>本页面数据为交易所标准手续费/保证金，仅供参考，不构成任何投资建议。实际费用以期货公司收取为准。行情数据来源于东方财富公开接口，可能会有延迟。</p>
+    <p>期货交易有风险，入市需谨慎。</p>
+<p style="margin-top:6px;">© 2026 期货手续费表 · 版权所有 · 未经授权请勿复制/转载。</p>
+  </div>
+</footer>
+
+<!-- 手续费说明弹窗 -->
+<div class="modal-mask" id="feeModal">
+  <div class="modal">
+    <span class="close" data-close="feeModal">×</span>
+    <h3>期货手续费收取方式说明</h3>
+    <p>国内期货手续费有两种收取方式：</p>
+    <p><b>方式一：按成交手数收取（固定金额，单位：元/手）</b><br>
+    例如苹果 AP 开仓每手 5 元，开 10 手就是 50 元，费用不随成交价变化。郑州商品交易所的合约基本都是这种方式。</p>
+    <p><b>方式二：按成交金额的比例收取（万分之 X）</b><br>
+    例如螺纹钢 rb 开仓按成交金额的万分之 1 收取：当前价 5000 元 × 10 吨/手 = 成交金额 50000 元 × 1/10000 = 5 元/手。价格越高，手续费越高。</p>
+    <div class="formula">
+      开仓费（按比例）= 最新价 × 合约乘数 × 费率（万分之 X）÷ 10000<br>
+      保证金 = 最新价 × 合约乘数 × 保证金比例<br>
+      每跳净利 = 每跳毛利（最小变动价位 × 合约乘数）−（开仓费 + 平今费）
+    </div>
+    <p>⚠️ <b>平今仓</b>（当天开、当天平）部分合约有优惠甚至免费（表中红色标注）；部分合约平今仓费率高于开仓。表中“开+平/元”按开仓 + 平今仓计算。</p>
+    <p>⚠️ 表中为<b>交易所标准</b>费率，期货公司通常在此基础上加收（如手续费 +X%、保证金 +X%），可通过上方计算器模拟加收后的费用。</p>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
