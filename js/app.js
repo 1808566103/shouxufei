@@ -31,7 +31,7 @@ var v = c[kind]||0;
 if(v===0){ return '<span class="fee-free" title="平今免费">免费</span>'; }
 if(c.feeType==="fixed"){ return '<span class="fee-fixed">'+trim0(v)+"元</span>"; }
 var amt = feeAmount(c, c.price, kind, 0);
-return '<span class="fee-amt" data-kind="'+kind+'">（'+fmtNum(amt,2)+'元）</span><span class="fee-rate">万分之'+trim0(v)+'</span>';
+return '<span class="fee-amt" data-kind="'+kind+'">（'+fmtNum(amt,2)+'）</span><span class="fee-rate">万分之'+trim0(v)+'</span>';
 }
 var state = {
 exch: "all",
@@ -236,7 +236,7 @@ toggleCell+
 "<td data-label='平昨'>"+feeCell(c,"closePrev")+"</td>"+
 "<td data-label='平今'>"+feeCell(c,"closeToday")+"</td>"+
 "<td data-label='开+平/元'><span class='oc-cell' data-code='"+c.code+"'>"+fmtNum(feeOC,2)+"</span></td>"+
-"<td data-label='每跳毛利'>"+c.tickValue.toFixed(1)+"</td>"+
+"<td data-label='每跳毛利'><span class='profit'>"+c.tickValue.toFixed(1)+"</span></td>"+
 "<td data-label='每跳净利'><span class='net-cell' data-code='"+c.code+"'>"+netShow+"</span></td>"+
 "<td data-label='备注'>"+esc(c.remark||"")+"</td>"+
 "</tr>";
@@ -245,7 +245,7 @@ function expansionContent(key){
 if(!allContracts){ return '<td colspan="15" class="empty-tip">正在加载全部合约…</td>'; }
 var list = allByVariety[key] || [];
 if(!list.length){ return '<td colspan="15" class="empty-tip">暂无可显示合约</td>'; }
-return '<td colspan="15"><div class="sub-wrap"><table class="sub-table"><thead><tr>'+headCells(false)+"</tr></thead><tbody>"+
+return '<td colspan="15"><div class="collapse-bar"><button class="collapse-btn" data-key="'+key+'">▲ 收起该品种全部合约</button></div><div class="sub-wrap"><table class="sub-table"><thead><tr>'+headCells(false)+"</tr></thead><tbody>"+
 list.map(function(c){ return rowHtml(c,false); }).join("")+
 "</tbody></table></div></td>";
 }
@@ -411,15 +411,9 @@ if(ok){
 dot.className = "dot ok";
 st.textContent = (source||"实时行情") + "已连接";
 $("quoteSyncTime").textContent = new Date().toLocaleString("zh-CN", {hour12:false});
-var notice = $("notice");
-notice.classList.remove("error"); notice.classList.add("ok");
-notice.innerHTML = "✅ <b>"+(source||"实时行情")+"已连接</b>（东方财富公开接口，每 15 秒自动刷新）。下表为<b>交易所标准</b>手续费与保证金；点击行首 ▸ 可展开该品种全部合约月份。";
 } else {
 dot.className = "dot err";
 st.textContent = "行情未连接（显示本地缓存数据）";
-var n2 = $("notice");
-n2.classList.remove("ok"); n2.classList.add("error");
-n2.innerHTML = "⚠️ <b>行情暂时无法连接</b>（可能是网络/接口限流），当前显示本地缓存价格，可手动在计算器中修改价格，或稍后点击「刷新行情」重试。";
 }
 }
 function quoteLoop(){
@@ -497,6 +491,7 @@ recalc();
 document.querySelectorAll("tbody tr").forEach(function(tr){
 tr.classList.toggle("selected", tr.getAttribute("data-code")===code);
 });
+expandCalc(true);
 $("calcSection").scrollIntoView({behavior:"smooth", block:"start"});
 }
 function recalc(){
@@ -591,6 +586,44 @@ document.body.appendChild(ta); ta.select();
 try{ document.execCommand("copy"); }catch(e){}
 ta.remove();
 }
+/* 手机端：点击品种弹出详情（含被隐藏的列） */
+function showDetail(code){
+var c = lookup(String(code).toLowerCase());
+if(!c) return;
+var ex = EXCHANGES.filter(function(e){ return e.id===c.exch; })[0];
+$("dtName").textContent = c.name;
+var net = netPerTick(c, c.price, 0), netT = fmtNet1(net);
+var netShow = net<0 ? '<span class="loss">'+netT+"</span>"
+: (net===0 || netT==="0") ? '<span class="zero">'+netT+"</span>"
+: '<span class="profit">'+netT+"</span>";
+var row = function(k, v){ return '<div class="drow"><span class="dk">'+k+'</span><span class="dv">'+v+'</span></div>'; };
+var html = "";
+html += row("代码", "<b>"+esc(c.code)+"</b>");
+html += row("交易所", esc(ex ? ex.name : c.exch));
+html += row("现价", '<span class="price-cell" data-code="'+c.code+'">'+fmtPrice(c.price)+"</span>");
+html += row("成交量", '<span class="vol-cell" data-code="'+c.code+'">'+fmtVol(c.volume)+"</span>");
+html += row("保证金比例", trim0(c.margin)+"%");
+html += row("保证金/元", '<span class="margin-cell" data-code="'+c.code+'">'+fmtNum(marginAmount(c,c.price,0),1)+"</span>");
+html += row("开仓手续费", feeText(c,"open"));
+html += row("平昨手续费", feeText(c,"closePrev"));
+html += row("平今手续费", feeText(c,"closeToday"));
+html += row("开+平/元", '<span class="oc-cell" data-code="'+c.code+'">'+fmtNum(openCloseFee(c,c.price,0),2)+"</span>");
+html += row("每跳毛利", c.tickValue.toFixed(1)+" 元");
+html += row("每跳净利", '<span class="net-cell" data-code="'+c.code+'">'+netShow+"</span>");
+html += row("备注", esc(c.remark||""));
+$("dtBody").innerHTML = html;
+state.detailCode = c.code;
+$("detailModal").classList.add("show");
+}
+/* 计算器展开/收起 */
+function expandCalc(open){
+var sec = $("calcSection");
+if(!sec) return;
+var want = (open===undefined) ? !sec.classList.contains("open") : open;
+sec.classList.toggle("open", want);
+var ar = $("calcArrow");
+if(ar) ar.textContent = want ? "▾" : "▸";
+}
 /* ---------- 事件绑定 ---------- */
 function bind(){
 renderTabs();
@@ -601,11 +634,56 @@ $("feeSyncTime").textContent = META.feeSyncTime;
 $("quoteSyncTime").textContent = META.quoteSyncTime;
 /* 行点击：展开按钮 ↔ 计算器选择 */
 $("main").addEventListener("click", function(e){
+var cb = e.target.closest(".collapse-btn");
+if(cb){
+var ckey = cb.getAttribute("data-key");
+var ctr = null;
+document.querySelectorAll(".main-table tbody tr[data-code]").forEach(function(t){
+if(!ctr && t.querySelector(".expand-btn") && varietyKey(t.getAttribute("data-code"))===ckey){ ctr = t; }
+});
+if(ctr){ toggleVariety(ctr.getAttribute("data-code")); }
+return;
+}
 var btn = e.target.closest(".expand-btn");
 if(btn){ toggleVariety(btn.getAttribute("data-code")); return; }
 var tr = e.target.closest("tr[data-code]");
-if(tr){ selectContract(tr.getAttribute("data-code")); }
+if(!tr) return;
+if(window.innerWidth <= 760){ showDetail(tr.getAttribute("data-code")); }
+else { selectContract(tr.getAttribute("data-code")); }
 });
+var calcHead = $("calcHead");
+if(calcHead){ calcHead.addEventListener("click", function(){ expandCalc(); }); }
+var calcClear = $("calcClear");
+if(calcClear){ calcClear.addEventListener("click", function(){
+$("calcContractInput").value = "";
+state.calcCode = null;
+closeCombo();
+$("calcResults").innerHTML = "<div class='empty-tip'>请选择或输入合约后自动计算</div>";
+$("calcInfo").textContent = "";
+$("calcContractInput").focus();
+}); }
+var dtCalc = $("dtCalc");
+if(dtCalc){ dtCalc.addEventListener("click", function(){
+if(state.detailCode){ selectContract(state.detailCode); }
+$("detailModal").classList.remove("show");
+}); }
+var dtExpand = $("dtExpand");
+if(dtExpand){ dtExpand.addEventListener("click", function(){
+if(!state.detailCode) return;
+$("detailModal").classList.remove("show");
+var key = varietyKey(state.detailCode);
+var mainTr = null;
+document.querySelectorAll(".main-table tbody tr[data-code]").forEach(function(tr){
+if(!mainTr && tr.querySelector(".expand-btn") && varietyKey(tr.getAttribute("data-code"))===key){ mainTr = tr; }
+});
+if(mainTr){
+var next = mainTr.nextElementSibling;
+if(!(next && next.classList.contains("expand-row"))){
+toggleVariety(mainTr.getAttribute("data-code"));
+}
+mainTr.scrollIntoView({behavior:"smooth", block:"center"});
+}
+}); }
 $("exchTabs").addEventListener("click", function(e){
 var t = e.target.closest(".tab");
 if(!t) return;
