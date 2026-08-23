@@ -44,12 +44,13 @@ if(state.exch!=="all" && state.exch!==ex) return;
 if(state.exch==="all" && list.length===0) return;
 var head = '<div class="ex-title"><span>'+ex+'</span><span class="count">'+list.length+' 个品种 · 单位：元/手 · <span class="fee-free">免收</span>表示平今免费</span></div>';
 var table = '<div class="table-wrap"><table><thead><tr>'+
-"<th>期权品种</th><th>代码</th><th>交易所</th><th>开仓</th><th>平昨</th><th>平今</th><th>行权</th><th>备注</th>"+
+"<th>期权品种</th><th>代码</th><th>开仓</th><th>平昨</th><th>平今</th><th>行权</th>"+
 "</tr></thead><tbody>"+
 list.map(function(o){
-return "<tr><td>"+esc(o.name)+"</td><td><b>"+esc(o.code)+"</b></td><td>"+esc(o.exch)+"</td>"+
-"<td>"+feeCell(o.open)+"</td><td>"+feeCell(o.closePrev)+"</td><td>"+feeCell(o.closeToday)+"</td><td>"+feeCell(o.exercise)+"</td>"+
-"<td>"+(o.remark?esc(o.remark):"")+"</td></tr>";
+return "<tr><td><span class='opt-name'>"+esc(o.name)+"</span>"+
+(o.remark?'<span class="opt-rem">'+esc(o.remark)+"</span>":"")+
+"</td><td><b>"+esc(o.code)+"</b></td>"+
+"<td>"+feeCell(o.open)+"</td><td>"+feeCell(o.closePrev)+"</td><td>"+feeCell(o.closeToday)+"</td><td>"+feeCell(o.exercise)+"</td></tr>";
 }).join("")+
 "</tbody></table></div>";
 blocks.push('<section class="exchange-block">'+head+table+"</section>");
