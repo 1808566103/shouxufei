@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>国内期货手续费与保证金实时计算 - 期货手续费一览表</title>
-<link rel="stylesheet" href="css/style.css?v=20260823n">
+<link rel="stylesheet" href="css/style.css?v=20260823x">
 </head>
 <body>
 
@@ -86,6 +86,13 @@
           <label>手续费加收（+%）</label>
           <input type="number" id="calcFeeAdd" value="0" step="0.1">
         </div>
+        <div class="field">
+          <label>吃几跳（理论回报率用）</label>
+          <input type="number" id="calcTicks" value="10" min="1" step="1">
+        </div>
+      </div>
+      <div class="global-toggle">
+        <label class="gt-label"><input type="checkbox" id="calcAllVarieties"> <b>应用到全部品种</b><span class="gt-desc">开启后：下方所有品种的保证金金额、手续费、回报率都按上面的加收参数和吃几跳重新计算显示</span></label>
       </div>
       <div class="calc-results" id="calcResults"></div>
       <div class="calc-info" id="calcInfo"></div>
@@ -158,8 +165,8 @@
   </div>
 </div>
 
-<script src="js/data.js?v=20260823n"></script>
-<script src="js/app.js?v=20260823n"></script>
+<script src="js/data.js?v=20260823x"></script>
+<script src="js/app.js?v=20260823x"></script>
 </body>
 </html>
 

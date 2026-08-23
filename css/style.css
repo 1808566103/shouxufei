@@ -133,7 +133,7 @@ tbody tr:hover{ background:#f6f9ff; }
 tbody tr.selected{ background:#fff2ef; }
 tbody tr.cursor{ cursor:pointer; }
 .fee-rate{ display:block; font-size:10.5px; color:#a3a8b1; line-height:1.15; font-weight:400; text-align:right; }
-.fee-amt{ display:block; font-size:14px; font-weight:700; color:var(--blue); line-height:1.15; text-align:right; }
+.fee-amt{ display:block; font-weight:700; color:var(--blue); line-height:1.15; text-align:right; }
 .fee-free{ color:var(--red); font-weight:700; }
 .fee-fixed{ color:#14532d; }
 .main-badge, .sub-badge{
@@ -257,11 +257,11 @@ footer a{ color:#cfd8ea; }
   .combo-list{ max-height:220px; }
 
   /* ===== 手机端表格：精简列，保留表格形态可对比品种 ===== */
-  .main-table, .sub-table{ font-size:9px; white-space:normal; }
-  .main-table .main-badge, .main-table .sub-badge, .sub-table .main-badge, .sub-table .sub-badge{ font-size:8px; padding:1px 3px; }
+  .main-table, .sub-table{ font-size:11px; white-space:normal; }
+  .main-table .main-badge, .main-table .sub-badge, .sub-table .main-badge, .sub-table .sub-badge{ font-size:9px; padding:1px 3px; }
   .main-table th, .main-table td, .sub-table th, .sub-table td{ padding:2px 1px; }
-  .main-table .fee-amt, .sub-table .fee-amt{ display:block; font-size:12px; font-weight:700; color:var(--blue); }
-  .main-table .fee-rate, .sub-table .fee-rate{ font-size:8px; color:#8a94a3; }
+  .main-table .fee-amt, .sub-table .fee-amt{ display:block; font-weight:700; color:var(--blue); }
+  .main-table .fee-rate, .sub-table .fee-rate{ font-size:9px; color:#8a94a3; }
   /* 主表隐藏：展开(1) 代码(3) 现价(4) 成交量(5) 买开%(6) 卖开%(7) 每跳净利(14) 备注(15) */
     .main-table > tbody > tr[data-code] .main-badge{ display:none; }
   .main-table > thead > tr > th:nth-child(1), .main-table > tbody > tr[data-code] > td:nth-child(1),
@@ -270,6 +270,7 @@ footer a{ color:#cfd8ea; }
   .main-table > thead > tr > th:nth-child(5), .main-table > tbody > tr[data-code] > td:nth-child(5),
   .main-table > thead > tr > th:nth-child(6), .main-table > tbody > tr[data-code] > td:nth-child(6),
   .main-table > thead > tr > th:nth-child(7), .main-table > tbody > tr[data-code] > td:nth-child(7),
+  .main-table > thead > tr > th:nth-child(13), .main-table > tbody > tr[data-code] > td:nth-child(13),
   .main-table > thead > tr > th:nth-child(14), .main-table > tbody > tr[data-code] > td:nth-child(14),
   .main-table > thead > tr > th:nth-child(15), .main-table > tbody > tr[data-code] > td:nth-child(15){ display:none; }
   .main-table > thead > tr > th:nth-child(2), .main-table > tbody > tr[data-code] > td:nth-child(2){ min-width:66px; }
@@ -279,11 +280,11 @@ footer a{ color:#cfd8ea; }
   .sub-table th:nth-child(4), .sub-table td:nth-child(4),
   .sub-table th:nth-child(5), .sub-table td:nth-child(5),
   .sub-table th:nth-child(6), .sub-table td:nth-child(6),
+  .sub-table th:nth-child(12), .sub-table td:nth-child(12),
   .sub-table th:nth-child(13), .sub-table td:nth-child(13),
   .sub-table th:nth-child(14), .sub-table td:nth-child(14){ display:none; }
   .sub-table th:nth-child(1), .sub-table td:nth-child(1){ min-width:50px; }
   .main-table tr.expand-row > td{ padding:0; background:transparent; border:none; display:table-cell; }
-  .fee-amt{ font-size:12.5px; }
   .fee-rate{ font-size:9.5px; }
 }
 
@@ -329,7 +330,6 @@ footer a{ color:#cfd8ea; }
   .promo b{ font-size:13px; }
   .promo .wechat{ padding:5px 12px; font-size:12px; }
   .float-btn{ right:12px; bottom:16px; padding:11px 14px; font-size:13px; }
-  .fee-amt{ font-size:12.5px; }
 }
 
 
@@ -400,3 +400,18 @@ footer a{ color:#cfd8ea; }
   padding:0; z-index:2;
 }
 .combo-clear:hover{ background:#d4dbe6; color:#333; }
+
+/* ================= 全部品种模式：手机端品种名下方回报率小字 ================= */
+.roi-mobile{ display:block; font-size:10px; font-weight:400; margin-top:1px; line-height:1.2; }
+.roi-mobile.profit{ color:var(--up); }
+.roi-mobile.loss{ color:var(--down); }
+
+/* ================= 计算器：应用到全部品种开关 ================= */
+.global-toggle{ margin-top:10px; padding:8px 12px; background:#fff7e6; border:1px solid #f0d79a; border-radius:8px; }
+.gt-label{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; cursor:pointer; }
+.gt-label input{ width:16px; height:16px; cursor:pointer; }
+.gt-label b{ color:#8a6d1a; }
+.gt-desc{ font-size:12px; color:#a08a4d; }
+
+/* ================= 回报率列：平今优惠 / 平昨不优惠 两行 ================= */
+.roi-line{ display:block; font-size:11px; line-height:1.25; white-space:nowrap; }
