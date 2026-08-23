@@ -282,7 +282,8 @@ footer a{ color:#cfd8ea; }
   .sub-table th:nth-child(6), .sub-table td:nth-child(6),
   .sub-table th:nth-child(12), .sub-table td:nth-child(12),
   .sub-table th:nth-child(13), .sub-table td:nth-child(13),
-  .sub-table th:nth-child(14), .sub-table td:nth-child(14){ display:none; }
+  .sub-table th:nth-child(14), .sub-table td:nth-child(14),
+  .sub-table th:nth-child(15), .sub-table td:nth-child(15){ display:none; }
   .sub-table th:nth-child(1), .sub-table td:nth-child(1){ min-width:50px; }
   .main-table tr.expand-row > td{ padding:0; background:transparent; border:none; display:table-cell; }
   .fee-rate{ font-size:9.5px; }
@@ -386,6 +387,7 @@ footer a{ color:#cfd8ea; }
 
 /* ================= 展开行：收起按钮 ================= */
 .collapse-bar{ padding:6px 10px; background:#eef4fb; border:1px solid var(--border); border-bottom:none; border-radius:8px 8px 0 0; text-align:center; }
+@media (min-width:821px){ .collapse-bar{ display:none; } }
 .collapse-btn{ background:var(--primary); color:#fff; border:none; border-radius:6px; padding:5px 14px; font-size:12px; cursor:pointer; }
 .collapse-btn:active{ opacity:.8; }
 

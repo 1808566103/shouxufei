@@ -152,6 +152,7 @@ var list = allByVariety[key]||[];
 var live = list[0] || null;
 var curCode = varietyMap[key].code.toLowerCase();
 if(live && live.volume===0 && allMap[curCode]){ live = allMap[curCode]; }
+if(!live || live.volume===0){ live = Object.assign({}, varietyMap[key]); }
 var c = live ? Object.assign({}, live) : Object.assign({}, varietyMap[key]);
 applyFeeOverride(c);
 newList.push(c);
@@ -209,7 +210,7 @@ return (withExpand ? "<th>展开</th>" : "") +
 "<th>合约名称</th><th>合约代码</th><th>现价</th><th>成交量↓</th>"+
 "<th>买开保证金%</th><th>卖开保证金%</th><th>保证金/元</th>"+
 "<th>开仓</th><th>平昨</th><th>平今</th><th>开+平/元</th>"+
-"<th>每跳毛利</th><th>每跳净利</th><th>回报率%</th>";
+"<th>每跳毛利</th><th>每跳净利</th><th>回报率%</th>"+(withExpand ? "" : "<th>备注</th>");
 }
 function rowHtml(c, withExpand){
 var gm = state.globalMode ? (Number(state.gMarginAdd)||0) : 0;
@@ -223,6 +224,7 @@ if(net<0){ netShow = '<span class="loss">'+netT+"</span>"; }
 else if(net===0 || netT==="0"){ netShow = '<span class="zero">'+netT+"</span>"; }
 else { netShow = '<span class="profit">'+netT+"</span>"; }
 var key = varietyKey(c.code);
+var badge = c.isMain ? '<span class="main-badge">主力</span>' : (c.remark==="次主力" ? '<span class="sub-badge">次主力</span>' : "");
 var marginTxt = trim0(c.margin+gm)+"%";
 var marginAmt = marginAmount(c, c.price, gm);
 var roiShow = '<span class="muted">—</span>';
@@ -245,7 +247,7 @@ var toggleCell = withExpand
 : "";
 return "<tr class='cursor' data-code='"+c.code+"'>"+
 toggleCell+
-"<td class='cell-name' data-label='合约名称'>"+esc(c.name)+roiMobile+"</td>"+
+"<td class='cell-name' data-label='合约名称'>"+esc(c.name)+badge+roiMobile+"</td>"+
 "<td data-label='代码'><b>"+esc(c.code)+"</b></td>"+
 "<td data-label='现价' class='price-now'><span class='price-cell' data-code='"+c.code+"'>"+fmtPrice(c.price)+"</span></td>"+
 "<td data-label='成交量' class='vol'><span class='vol-cell' data-code='"+c.code+"'>"+fmtVol(c.volume)+"</span></td>"+
@@ -259,6 +261,7 @@ toggleCell+
 "<td data-label='每跳毛利'><span class='profit'>"+c.tickValue.toFixed(1)+"</span></td>"+
 "<td data-label='每跳净利'><span class='net-cell' data-code='"+c.code+"'>"+netShow+"</span></td>"+
 "<td data-label='回报率%'>"+roiShow+"</td>"+
+(withExpand ? "" : "<td data-label='备注'>"+esc(c.remark||"")+"</td>")+
 "</tr>";
 }
 function expansionContent(key){
