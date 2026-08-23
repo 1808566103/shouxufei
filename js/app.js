@@ -42,7 +42,20 @@ userPriceEdited: false,
 expanded: {},
 calcCode: null
 };
-var contracts = CONTRACTS.map(function(c){ return Object.assign({}, c); });
+function applyFeeOverride(c){
+var key = varietyKey(c.code);
+if(key==="au"){
+var m = /(\d{2})$/.exec(c.code);
+var isJunDec = m && (m[1]==="06" || m[1]==="12");
+var fee20 = !!c.isMain || isJunDec;
+c.feeType = "fixed";
+c.open = fee20 ? 20 : 10;
+c.closePrev = c.open;
+c.closeToday = 0;
+}
+return c;
+}
+var contracts = CONTRACTS.map(function(c){ return applyFeeOverride(Object.assign({}, c)); });
 var contractMap = {};
 contracts.forEach(function(c){ contractMap[c.code.toLowerCase()] = c; });
 var varietyMap = {};
@@ -105,6 +118,7 @@ if(!(key in volByVariety) || c.volume > volByVariety[key]){ volByVariety[key] = 
 list.forEach(function(c){
 var key = varietyKey(c.code);
 if(c.volume>0 && c.volume===volByVariety[key]){ c.isMain = true; c.remark = "主力"; }
+applyFeeOverride(c);
 });
 return list;
 }
@@ -122,7 +136,50 @@ allByVariety[k].sort(function(a,b){ return (b.volume||0)-(a.volume||0); });
 buildComboSource();
 }
 function prefetchAll(){
-fetchAllContracts().then(indexAll).catch(function(){});
+fetchAllContracts().then(function(list){
+indexAll(list);
+rebuildMainFromLive();
+scheduleMainRefresh();
+}).catch(function(){});
+}
+function rebuildMainFromLive(){
+if(!allContracts) return;
+var newList = [];
+Object.keys(varietyMap).forEach(function(key){
+var list = allByVariety[key]||[];
+var live = list[0] || null;
+var curCode = varietyMap[key].code.toLowerCase();
+if(live && live.volume===0 && allMap[curCode]){ live = allMap[curCode]; }
+var c = live ? Object.assign({}, live) : Object.assign({}, varietyMap[key]);
+applyFeeOverride(c);
+newList.push(c);
+});
+if(!newList.length) return;
+var changed = newList.length!==contracts.length;
+if(!changed){
+for(var i=0;i<newList.length;i++){
+if(newList[i].code!==contracts[i].code){ changed = true; break; }
+}
+}
+if(!changed) return;
+contracts = newList;
+contractMap = {};
+contracts.forEach(function(c){ contractMap[c.code.toLowerCase()] = c; });
+if(state.calcCode && !contractMap[state.calcCode.toLowerCase()]){
+state.calcCode = contracts[0] ? contracts[0].code : null;
+}
+renderTabs();
+renderTables();
+buildComboSource();
+}
+function scheduleMainRefresh(){
+setTimeout(function(){
+fetchAllContracts().then(function(list){
+indexAll(list);
+rebuildMainFromLive();
+scheduleMainRefresh();
+}).catch(scheduleMainRefresh);
+}, 15*60*1000);
 }
 function matchSearch(c){
 var q = state.search.trim().toLowerCase();

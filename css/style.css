@@ -340,3 +340,20 @@ footer a{ color:#cfd8ea; }
 
 
 
+
+/* ================= 数据维护说明（期权页） ================= */
+.maintain{ max-width:1500px; margin:14px auto 0; padding:0 24px; }
+.maintain .panel{ background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+.maintain .panel-head{ background:linear-gradient(90deg,#e8f1fb,#fff); padding:10px 16px; font-size:14px; font-weight:700; border-bottom:1px solid var(--border); }
+.maintain .panel-body{ padding:12px 16px; font-size:13px; color:var(--text); }
+.maintain .grid{ display:flex; flex-wrap:wrap; gap:14px 32px; }
+.maintain .grid .item b{ display:block; font-size:12px; color:#7a8699; font-weight:600; margin-bottom:3px; }
+.maintain .grid .item span{ font-size:14px; font-weight:700; }
+.maintain .grid .item span.warn{ color:var(--red); }
+.maintain .log{ margin-top:12px; border-top:1px dashed var(--border); padding-top:10px; }
+.maintain .log p{ margin:0 0 4px; }
+.maintain .log table{ width:100%; border-collapse:collapse; font-size:12.5px; margin-top:6px; }
+.maintain .log th,.maintain .log td{ text-align:left; padding:5px 8px; border-bottom:1px solid var(--border); vertical-align:top; line-height:1.6; }
+.maintain .log th{ color:#7a8699; font-weight:600; white-space:nowrap; }
+.maintain .log td:first-child{ white-space:nowrap; color:var(--blue); font-weight:600; }
+@media (max-width:720px){ .maintain{ padding:0 12px; } }
