@@ -512,12 +512,32 @@ state.calcCode = c.code;
 $("calcContractInput").value = c.name+" ("+c.code+")";
 $("calcPrice").value = c.price;
 state.userPriceEdited = false;
+syncTicksPoints("calcTicks");
 recalc();
 document.querySelectorAll("tbody tr").forEach(function(tr){
 tr.classList.toggle("selected", tr.getAttribute("data-code")===code);
 });
 expandCalc(true);
 $("calcSection").scrollIntoView({behavior:"smooth", block:"start"});
+}
+var syncingTP = false;
+function syncTicksPoints(changed){
+if(syncingTP) return;
+var c = state.calcCode ? lookup(state.calcCode.toLowerCase()) : contracts[0];
+if(!c) return;
+syncingTP = true;
+try{
+if(changed==="calcTicks"){
+var tv = $("calcTicks").value;
+var t = Number(tv);
+if(tv!=="" && !isNaN(t)){ $("calcPoints").value = trim0(t * c.tickValue / c.mult); }
+} else {
+var pv = $("calcPoints").value;
+var p = Number(pv);
+if(pv!=="" && !isNaN(p)){ $("calcTicks").value = trim0(p * c.mult / c.tickValue); }
+}
+}catch(e){}
+syncingTP = false;
 }
 function recalc(){
 var c = state.calcCode ? lookup(state.calcCode.toLowerCase()) : contracts[0];
@@ -539,6 +559,20 @@ var netToday = ticksProfit - openF - todayF;
 var netPrev = ticksProfit - openF - prevF;
 var roiToday = mPer>0 ? netToday/mPer*100 : 0;
 var roiPrev = mPer>0 ? netPrev/mPer*100 : 0;
+var pts = Number($("calcPoints").value);
+var hasPts = !isNaN(pts) && pts>0;
+var ptsProfitT = null, ptsProfitP = null, ptsRoiT = null, ptsRoiP = null, ptsTotal = null;
+var ptsSameAsTicks = false;
+if(hasPts){
+var ptsGross = pts * c.mult;
+ptsProfitT = ptsGross - openF - todayF;
+ptsProfitP = ptsGross - openF - prevF;
+ptsRoiT = mPer>0 ? ptsProfitT/mPer*100 : 0;
+ptsRoiP = mPer>0 ? ptsProfitP/mPer*100 : 0;
+ptsTotal = ptsProfitT * lots;
+ptsSameAsTicks = Math.abs(pts * c.mult / c.tickValue - ticks) < 0.005;
+}
+var sameRoi = Math.abs(roiToday-roiPrev) < 0.005;
 var items = [
 {k:"每手保证金", v:fmtNum(mPer,0), unit:"元", cls:""},
 {k:"总保证金（"+lots+"手）", v:fmtNum(mPer*lots,0), unit:"元", cls:""},
@@ -549,10 +583,21 @@ var items = [
 {k:"开+平总费用（"+lots+"手）", v:fmtNum(ocPer*lots,2), unit:"元", cls:""},
 {k:"每跳毛利", v:c.tickValue.toFixed(1), unit:"元", cls:"up"},
 {k:"每跳净利", v:fmtNum(net,2), unit:"元", cls: net<0?"loss":"profit"},
-{k:"吃"+ticks+"跳·毛利", v:fmtNum(ticksProfit,1), unit:"元", cls:"up"},
-{k:"回报率·平今优惠", v:fmtNum(roiToday,2), unit:"%", cls: roiToday<0?"loss":"profit"},
-{k:"回报率·平昨不优惠", v:fmtNum(roiPrev,2), unit:"%", cls: roiPrev<0?"loss":"profit"}
-];
+{k:"吃"+ticks+"跳·毛利", v:fmtNum(ticksProfit,1), unit:"元", cls:"up"}
+].concat(
+sameRoi
+? [{k:"回报率", v:fmtNum(roiToday,2), unit:"%", cls: roiToday<0?"loss":"profit"}]
+: [{k:"回报率·平今优惠", v:fmtNum(roiToday,2), unit:"%", cls: roiToday<0?"loss":"profit"},
+{k:"回报率·平昨不优惠", v:fmtNum(roiPrev,2), unit:"%", cls: roiPrev<0?"loss":"profit"}]
+).concat(
+hasPts ? [
+{k:"吃"+pts+"点·盈亏/手"+(sameRoi?"":"(平今)"), v:fmtNum(ptsProfitT,2), unit:"元", cls: ptsProfitT<0?"loss":"profit"},
+(!sameRoi ? {k:"吃"+pts+"点·盈亏/手(平昨)", v:fmtNum(ptsProfitP,2), unit:"元", cls: ptsProfitP<0?"loss":"profit"} : null),
+(!ptsSameAsTicks ? {k:"吃"+pts+"点·回报率"+(sameRoi?"":"(平今)"), v:fmtNum(ptsRoiT,2), unit:"%", cls: ptsRoiT<0?"loss":"profit"} : null),
+(!ptsSameAsTicks && !sameRoi ? {k:"吃"+pts+"点·回报率(平昨)", v:fmtNum(ptsRoiP,2), unit:"%", cls: ptsRoiP<0?"loss":"profit"} : null),
+{k:"吃"+pts+"点·总盈亏("+lots+"手)", v:fmtNum(ptsTotal,2), unit:"元", cls: ptsTotal<0?"loss":"profit"}
+].filter(Boolean) : []
+);
 $("calcResults").innerHTML = items.map(function(x){
 return '<div class="rrow"><span class="rk">'+x.k+'</span><span class="rv '+(x.cls||"")+'">'+x.v+'<span class="unit">'+x.unit+"</span></span></div>";
 }).join("");
@@ -565,7 +610,7 @@ state.gFeeAdd = Number($("calcFeeAdd").value)||0;
 state.gTicks = Math.max(1, Math.floor(Number($("calcTicks").value)||10));
 renderTables();
 }
-$("calcInfo").textContent = "合约乘数："+c.mult+" · 交易所标准保证金："+trim0(c.margin)+"% · 手续费标准："+feeStd+
+$("calcInfo").textContent = "合约乘数："+c.mult+" · 最小变动单位："+trim0(c.tickValue/c.mult)+" · 交易所标准保证金："+trim0(c.margin)+"% · 手续费标准："+feeStd+
 " · 每跳盈亏："+c.tickValue+"元"+(marginAdd||feeAdd ? "（已含加收：保证金+"+trim0(marginAdd)+"%，手续费+"+trim0(feeAdd)+"%）" : "");
 }
 function exportExcel(mode){
@@ -794,10 +839,11 @@ navigator.clipboard.writeText(w).then(done, function(){ fallbackCopy(w); done();
 } else { fallbackCopy(w); done(); }
 });
 });
-["calcPrice","calcLots","calcMarginAdd","calcFeeAdd","calcTicks"].forEach(function(id){
+["calcPrice","calcLots","calcMarginAdd","calcFeeAdd","calcTicks","calcPoints"].forEach(function(id){
 $(id).addEventListener("change", recalc);
 $(id).addEventListener("input", function(){
 if(id==="calcPrice"){ state.userPriceEdited = true; }
+if(id==="calcTicks" || id==="calcPoints"){ syncTicksPoints(id); }
 recalc();
 });
 });
