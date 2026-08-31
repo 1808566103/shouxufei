@@ -417,3 +417,7 @@ footer a{ color:#cfd8ea; }
 
 /* ================= 回报率列：平今优惠 / 平昨不优惠 两行 ================= */
 .roi-line{ display:block; font-size:11px; line-height:1.25; white-space:nowrap; }
+
+/* ================= 加入交流群按钮 ================= */
+.promo .btn-more.group{ background:#FFD54F; color:#5d3a00; border-radius:5px; padding:5px 12px; font-weight:700; text-decoration:none; }
+.promo .btn-more.group:hover{ background:#FFC107; color:#3d2600; }

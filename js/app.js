@@ -824,6 +824,8 @@ el.addEventListener("click", function(){ $(el.getAttribute("data-close")).classL
 });
 $("feeModal").addEventListener("click", function(e){ if(e.target===this) this.classList.remove("show"); });
 /* 开户广告 */
+var btnGroup = $("btnOpenGroup");
+if(btnGroup){ btnGroup.addEventListener("click", function(){ $("groupModal").classList.add("show"); }); }
 var adOpeners = ["btnFloatAd","btnOpenAd"];
 adOpeners.forEach(function(id){
 var el = $(id);
